@@ -1,0 +1,1 @@
+cd rs-forms && npx lint-staged npm run test
