@@ -1,2 +1,2 @@
 export * from './store';
-export * from './slice';
+export * from './form-slice';

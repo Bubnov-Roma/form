@@ -1,0 +1,20 @@
+.buttons_block {
+  width: 100%;
+  max-width: 350px;
+  margin: auto;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.userCard {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  transition: border-color 0.3s;
+}
+
+.highlight {
+  border: 2px solid green;
+}

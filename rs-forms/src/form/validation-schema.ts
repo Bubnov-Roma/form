@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+import { countries } from './countries';
 
 const FILE_SIZE = 2 * 1024 * 1024;
 const SUPPORTED_FORMATS = ['image/jpeg', 'image/png'];
@@ -7,8 +8,10 @@ export const ValidationSchema = yup.object({
   name: yup
     .string()
     .required('Name is required')
-    .min(1)
-    .matches(/^[ A-Za-z]+$/, 'Only letters and spaces'),
+    .matches(
+      /^[A-ZА-ЯЁ][a-zа-яёA-ZА-ЯЁ ]*$/,
+      'Must start with a capital letter and contain only letters or spaces'
+    ),
   age: yup
     .number()
     .required('Age is required')
@@ -54,7 +57,13 @@ export const ValidationSchema = yup.object({
     .matches(/^[^ ]{2,}$/, 'The password must not contain spaces')
     .oneOf([yup.ref('password')], 'Passwords must match'),
   gender: yup.string().required('Gender is required'),
-  country: yup.string().required('Country is required'),
+  country: yup
+    .string()
+    .required('Country is required')
+    .oneOf(
+      countries.map((c) => c.value),
+      'Please select a valid country'
+    ),
   agreement: yup
     .bool()
     .oneOf([true], 'You must accept the agreement')

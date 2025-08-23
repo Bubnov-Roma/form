@@ -1,32 +1,51 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { type RootState } from './store';
-import { openModal, closeModal, saveData } from './store/slice';
+import {
+  openModal,
+  closeModal,
+  saveData,
+  clearHighlight,
+} from './store/form-slice';
 import { Modal } from './form/modal';
 import { UniversalForm } from './form/form';
 import type { FormValues } from './interfaces';
+import styles from './app.module.css';
+import { useEffect } from 'react';
+import { fileToBase64 } from './utils/file-to-base-64';
 
 export const App = () => {
   const dispatch = useDispatch();
-  const { isModalOpen, mode, data } = useSelector(
+  const { isModalOpen, mode, dataList, lastAddedId } = useSelector(
     (state: RootState) => state.form
   );
 
-  return (
-    <div>
-      <button onClick={() => dispatch(openModal('controlled'))}>
-        Open Controlled Form
-      </button>
-      <button onClick={() => dispatch(openModal('uncontrolled'))}>
-        Open Uncontrolled Form
-      </button>
+  useEffect(() => {
+    if (lastAddedId) {
+      const timer = setTimeout(() => {
+        dispatch(clearHighlight());
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [lastAddedId, dispatch]);
 
-      {data && (
-        <div>
+  return (
+    <>
+      {dataList.length > 0 && (
+        <div className={styles.dataList}>
           <h3>Saved User Data:</h3>
-          <pre>{JSON.stringify(data, null, 2)}</pre>
-          {data.avatarBase64 && (
-            <img src={data.avatarBase64} alt="Avatar" width={100} />
-          )}
+          {dataList.map((user) => (
+            <div
+              key={user.id}
+              className={`${styles.userCard} ${
+                lastAddedId === user.id ? styles.highlight : ''
+              }`}
+            >
+              <pre>{JSON.stringify(user, null, 2)}</pre>
+              {user.avatarBase64 && (
+                <img src={user.avatarBase64} alt="Avatar" width={100} />
+              )}
+            </div>
+          ))}
         </div>
       )}
 
@@ -34,8 +53,13 @@ export const App = () => {
         {mode && (
           <UniversalForm
             mode={mode}
-            defaultValues={data ?? undefined}
-            onSubmit={(formData: FormValues) => {
+            onSubmit={async (formData: FormValues) => {
+              let avatarBase64: string | null = null;
+
+              if (formData.avatar instanceof File) {
+                avatarBase64 = await fileToBase64(formData.avatar);
+              }
+
               dispatch(
                 saveData({
                   name: formData.name,
@@ -44,13 +68,22 @@ export const App = () => {
                   gender: formData.gender,
                   country: formData.country,
                   agreement: formData.agreement,
-                  avatarBase64: data?.avatarBase64 ?? null,
+                  avatarBase64,
                 })
               );
             }}
           />
         )}
       </Modal>
-    </div>
+
+      <div className={styles.buttons_block}>
+        <button onClick={() => dispatch(openModal('controlled'))}>
+          Controlled Form
+        </button>
+        <button onClick={() => dispatch(openModal('uncontrolled'))}>
+          Uncontrolled Form
+        </button>
+      </div>
+    </>
   );
 };

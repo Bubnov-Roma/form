@@ -1,79 +1,138 @@
 import { Controller, type Control } from 'react-hook-form';
-import type { ReactElement } from 'react';
+import styles from './form.module.css';
 import type { FormValues } from '../interfaces';
+import { useSelector } from 'react-redux';
+import { type RootState } from '../store/store';
 
-interface FormInputProperties {
-  name: keyof FormValues;
-  control: Control<FormValues>;
+interface BaseProps {
   label: string;
-  type: string;
+  error?: string;
   options?: string[];
 }
 
-export const Input = ({
-  name,
-  control,
-  label,
-  type,
-  options,
-}: FormInputProperties): ReactElement => {
+type ControlledProps = BaseProps & {
+  control: Control<FormValues>;
+  name: keyof FormValues;
+  type?: string;
+};
+
+export function Input(props: ControlledProps) {
+  const countries = useSelector(
+    (state: RootState) => state.countries.allCountries
+  );
+
+  const { control, name, label, type = 'text', error, options } = props;
+
   return (
     <Controller
-      name={name}
       control={control}
-      render={({ field, fieldState }) => (
-        <div style={{ marginBottom: '12px' }}>
-          {type !== 'checkbox' && <label>{label}</label>}
-
-          {type === 'checkbox' ? (
-            <input
-              type="checkbox"
-              checked={!!field.value}
-              onChange={(e) => field.onChange(e.target.checked)}
-            />
-          ) : type === 'select' && options ? (
-            <select
-              value={(field.value as string) ?? ''}
-              onChange={(e) => field.onChange(e.target.value)}
-            >
-              <option value="">Select {label}</option>
-              {options.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-          ) : type === 'file' ? (
-            <input
-              type="file"
-              accept="image/png,image/jpeg"
-              onChange={(e) => field.onChange(e.target.files?.[0] ?? null)}
-            />
-          ) : type === 'autocomplete' && options ? (
-            <>
+      name={name}
+      render={({ field }) => {
+        if (type === 'autocomplete') {
+          return (
+            <div className={styles.field}>
+              <label htmlFor={name} className={styles.label}>
+                {label}
+              </label>
               <input
+                id={name}
                 list={`${name}-list`}
-                value={(field.value as string) ?? ''}
+                value={`${field.value}`}
                 onChange={field.onChange}
+                className={`${styles.input} ${error ? styles.errorInput : ''}`}
               />
               <datalist id={`${name}-list`}>
-                {options.map((opt) => (
-                  <option key={opt} value={opt} />
+                {countries.map((country) => (
+                  <option key={country.value} value={country.value}>
+                    {country.label}
+                  </option>
                 ))}
               </datalist>
-            </>
-          ) : (
+              {error && <p className={styles.errorText}>{error}</p>}
+            </div>
+          );
+        }
+
+        if (type === 'file') {
+          return (
+            <div className={styles.formAvatarBlock}>
+              <label className={styles.label}>{label}</label>
+              <label className={styles.avatarUpload}>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    field.onChange(file);
+                  }}
+                  className={styles.fileInput}
+                />
+                {field.value instanceof File ? (
+                  <img
+                    src={URL.createObjectURL(field.value)}
+                    alt="avatar"
+                    className={styles.avatarPreview}
+                  />
+                ) : (
+                  <span className={styles.avatarIcon}>👤</span>
+                )}
+              </label>
+              {error && <p className={styles.errorText}>{error}</p>}
+            </div>
+          );
+        }
+
+        if (type === 'checkbox') {
+          return (
+            <div className={styles.fieldCheckbox}>
+              <div className={styles.checkboxWrapper}>
+                <input
+                  type="checkbox"
+                  checked={!!field.value}
+                  onChange={(e) => field.onChange(e.target.checked)}
+                  className={styles.checkbox}
+                />
+                <label className={styles.label}>{label}</label>
+              </div>
+              {error && <p className={styles.errorText}>{error}</p>}
+            </div>
+          );
+        }
+
+        if (type === 'select' && options) {
+          return (
+            <div className={styles.field}>
+              <label className={styles.label}>{label}</label>
+              <select
+                value={`${field.value}`}
+                onChange={field.onChange}
+                className={`${styles.input} ${error ? styles.errorInput : ''}`}
+              >
+                <option value="">Select {label}</option>
+                {options.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+              {error && <p className={styles.errorText}>{error}</p>}
+            </div>
+          );
+        }
+
+        return (
+          <div className={styles.field}>
+            <label className={styles.label}>{label}</label>
             <input
               type={type}
-              value={field.value as string | number}
+              value={`${field.value}`}
               onChange={field.onChange}
+              className={`${styles.input} ${error ? styles.errorInput : ''}`}
             />
-          )}
-          {fieldState.error && (
-            <p style={{ color: 'red' }}>{fieldState.error.message}</p>
-          )}
-        </div>
-      )}
+            {error && <p className={styles.errorText}>{error}</p>}
+          </div>
+        );
+      }}
     />
   );
-};
+}
