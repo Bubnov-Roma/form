@@ -4,7 +4,7 @@ import type { FormValues, UniversalFormProps } from '../interfaces';
 import styles from './form.module.css';
 import { ValidationError } from 'yup';
 import { useSelector } from 'react-redux';
-import { type RootState } from '../store/store';
+import { type RootState } from '../store';
 
 export function UncontrolledForm({
   defaultValues,
@@ -22,13 +22,13 @@ export function UncontrolledForm({
     const formData = new FormData(e.target as HTMLFormElement);
 
     const rawData: FormValues = {
-      name: formData.get('name') as string,
+      name: String(formData.get('name') ?? ''),
       age: Number(formData.get('age')),
-      email: formData.get('email') as string,
-      password: formData.get('password') as string,
-      confPassword: formData.get('confPassword') as string,
-      gender: formData.get('gender') as string,
-      country: formData.get('country') as string,
+      email: String(formData.get('email') ?? ''),
+      password: String(formData.get('password') ?? ''),
+      confPassword: String(formData.get('confPassword') ?? ''),
+      gender: String(formData.get('gender') ?? ''),
+      country: String(formData.get('country') ?? ''),
       agreement: formData.get('agreement') === 'on',
       avatar: (formData.get('avatar') as File) ?? ({} as File),
     };
@@ -63,11 +63,18 @@ export function UncontrolledForm({
   };
 
   return (
-    <form onSubmit={handleUncontrolledSubmit} className={styles.form}>
+    <form
+      onSubmit={handleUncontrolledSubmit}
+      className={styles.form}
+      role="form"
+    >
       <div className={styles.formAvatarBlock}>
-        <label className={styles.label}>Avatar</label>
-        <label className={styles.avatarUpload}>
+        <label className={styles.label} htmlFor="avatar">
+          Avatar
+        </label>
+        <label className={styles.avatarUpload} htmlFor="avatar">
           <input
+            id="avatar"
             name="avatar"
             type="file"
             accept="image/png,image/jpeg"
@@ -88,8 +95,11 @@ export function UncontrolledForm({
       </div>
       <div className={styles.formBlock}>
         <div className={styles.field}>
-          <label className={styles.label}>Name</label>
+          <label className={styles.label} htmlFor="name">
+            Name
+          </label>
           <input
+            id="name"
             name="name"
             type="text"
             defaultValue={defaultValues?.name}
@@ -98,8 +108,11 @@ export function UncontrolledForm({
           {errors.name && <p className={styles.errorText}>{errors.name}</p>}
         </div>
         <div className={styles.field}>
-          <label className={styles.label}>Age</label>
+          <label className={styles.label} htmlFor="age">
+            Age
+          </label>
           <input
+            id="age"
             name="age"
             type="number"
             defaultValue={defaultValues?.age}
@@ -110,8 +123,11 @@ export function UncontrolledForm({
       </div>
       <div className={styles.formBlock}>
         <div className={styles.field}>
-          <label className={styles.label}>Email</label>
+          <label className={styles.label} htmlFor="email">
+            Email
+          </label>
           <input
+            id="email"
             name="email"
             type="text"
             defaultValue={defaultValues?.email}
@@ -122,8 +138,11 @@ export function UncontrolledForm({
       </div>
       <div className={styles.formBlock}>
         <div className={styles.field}>
-          <label className={styles.label}>Password</label>
+          <label className={styles.label} htmlFor="password">
+            Password
+          </label>
           <input
+            id="password"
             name="password"
             type="password"
             className={`${styles.input} ${errors.password ? styles.errorInput : ''}`}
@@ -134,8 +153,11 @@ export function UncontrolledForm({
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>Confirm Password</label>
+          <label className={styles.label} htmlFor="confPassword">
+            Confirm Password
+          </label>
           <input
+            id="confPassword"
             name="confPassword"
             type="password"
             className={`${styles.input} ${errors.confPassword ? styles.errorInput : ''}`}
@@ -148,8 +170,11 @@ export function UncontrolledForm({
 
       <div className={styles.formBlock}>
         <div className={styles.field}>
-          <label className={styles.label}>Gender</label>
+          <label className={styles.label} htmlFor="gender">
+            Gender
+          </label>
           <select
+            id="gender"
             name="gender"
             defaultValue={defaultValues?.gender}
             className={`${styles.select} ${errors.gender ? styles.errorInput : ''}`}
@@ -163,8 +188,11 @@ export function UncontrolledForm({
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>Country</label>
+          <label className={styles.label} htmlFor="country">
+            Country
+          </label>
           <input
+            id="country"
             name="country"
             list="country-list"
             defaultValue={defaultValues?.country}
@@ -189,12 +217,15 @@ export function UncontrolledForm({
         <div className={styles.fieldCheckbox}>
           <div className={styles.checkboxWrapper}>
             <input
+              id="agreement"
               name="agreement"
               type="checkbox"
               defaultChecked={defaultValues?.agreement}
               className={styles.checkbox}
             />
-            <label>Accept Terms and Conditions Agreement</label>
+            <label htmlFor="agreement">
+              Accept Terms and Conditions Agreement
+            </label>
           </div>
           {errors.agreement && (
             <p className={styles.errorText}>{errors.agreement}</p>

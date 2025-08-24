@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './modal.module.css';
@@ -20,7 +21,11 @@ export const Modal = ({ isOpen, onClose, children }: ModalProps) => {
   if (!isOpen) return null;
 
   return createPortal(
-    <div className={styles.overlay} onClick={onClose}>
+    <div
+      className={styles.overlay}
+      onClick={onClose}
+      data-testid="modal-overlay"
+    >
       <div
         className={styles.modal}
         onClick={(e) => e.stopPropagation()}

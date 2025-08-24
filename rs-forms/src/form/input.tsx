@@ -2,7 +2,7 @@ import { Controller, type Control } from 'react-hook-form';
 import styles from './form.module.css';
 import type { FormValues } from '../interfaces';
 import { useSelector } from 'react-redux';
-import { type RootState } from '../store/store';
+import { type RootState } from '../store';
 
 interface BaseProps {
   label: string;
@@ -56,11 +56,14 @@ export function Input(props: ControlledProps) {
         if (type === 'file') {
           return (
             <div className={styles.formAvatarBlock}>
-              <label className={styles.label}>{label}</label>
-              <label className={styles.avatarUpload}>
+              <label className={styles.label} htmlFor={name}>
+                {label}
+              </label>
+              <label className={styles.avatarUpload} htmlFor={name}>
                 <input
                   type="file"
                   accept="image/png,image/jpeg"
+                  id={name}
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
                     field.onChange(file);
@@ -91,8 +94,11 @@ export function Input(props: ControlledProps) {
                   checked={!!field.value}
                   onChange={(e) => field.onChange(e.target.checked)}
                   className={styles.checkbox}
+                  id={name}
                 />
-                <label className={styles.label}>{label}</label>
+                <label className={styles.label} htmlFor={name}>
+                  {label}
+                </label>
               </div>
               {error && <p className={styles.errorText}>{error}</p>}
             </div>
@@ -102,8 +108,11 @@ export function Input(props: ControlledProps) {
         if (type === 'select' && options) {
           return (
             <div className={styles.field}>
-              <label className={styles.label}>{label}</label>
+              <label className={styles.label} htmlFor={name}>
+                {label}
+              </label>
               <select
+                id={name}
                 value={`${field.value}`}
                 onChange={field.onChange}
                 className={`${styles.input} ${error ? styles.errorInput : ''}`}
@@ -122,8 +131,11 @@ export function Input(props: ControlledProps) {
 
         return (
           <div className={styles.field}>
-            <label className={styles.label}>{label}</label>
+            <label className={styles.label} htmlFor={name}>
+              {label}
+            </label>
             <input
+              id={name}
               type={type}
               value={`${field.value}`}
               onChange={field.onChange}
