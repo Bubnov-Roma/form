@@ -9,7 +9,6 @@ interface BaseProps {
   error?: string;
   options?: string[];
 }
-
 type ControlledProps = BaseProps & {
   control: Control<FormValues>;
   name: keyof FormValues;
@@ -20,9 +19,7 @@ export function Input(props: ControlledProps) {
   const countries = useSelector(
     (state: RootState) => state.countries.allCountries
   );
-
   const { control, name, label, type = 'text', error, options } = props;
-
   return (
     <Controller
       control={control}
@@ -52,7 +49,6 @@ export function Input(props: ControlledProps) {
             </div>
           );
         }
-
         if (type === 'file') {
           return (
             <div className={styles.formAvatarBlock}>
@@ -84,7 +80,6 @@ export function Input(props: ControlledProps) {
             </div>
           );
         }
-
         if (type === 'checkbox') {
           return (
             <div className={styles.fieldCheckbox}>
@@ -104,7 +99,6 @@ export function Input(props: ControlledProps) {
             </div>
           );
         }
-
         if (type === 'select' && options) {
           return (
             <div className={styles.field}>
