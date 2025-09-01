@@ -25,11 +25,9 @@ export function ControlledForm({
       ...defaultValues,
     },
   });
-
   const handleControlledSubmit = (data: FormValues) => {
     onSubmit(data);
   };
-
   return (
     <form
       onSubmit={handleSubmit(handleControlledSubmit)}

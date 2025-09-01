@@ -6,11 +6,11 @@
 
 **Тестовые действия:**
 
-1. Поиск страны
-2. Выбор другого года
-3. Сортировка по населению
-4. Добавление/удаление колонки
-5. Фильтрация по региону
+1. Country search
+2. Choose another year
+3. Sorting by population
+4. Add/remove a column
+5. Filter by region
 
 **Наблюдения:**
 
