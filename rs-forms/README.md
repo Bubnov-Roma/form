@@ -1,69 +1,96 @@
-# React + TypeScript + Vite
+# Performance Profiling
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Initial Profiling (до оптимизаций)
 
-Currently, two official plugins are available:
+**Инструменты:** React DevTools → Profiler
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Тестовые действия:**
 
-## Expanding the ESLint configuration
+1. Поиск страны
+2. Выбор другого года
+3. Сортировка по населению
+4. Добавление/удаление колонки
+5. Фильтрация по региону
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+**Наблюдения:**
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Committed at: ~XXms sorting by population
+- Render Duration: ~XXms sorting by population
+- Committed at: ~XXms country search
+- Render Duration: ~XXms country search
+- Committed at: ~XXms change of year
+- Render Duration: ~XXms change of year
+- Committed at: ~XXm add/remove a column
+- Render Duration: ~XXms add/remove a column
+- Render Duration:
+  - `LazyComponent`: ~XXms
+  - `CountryList`: ~XXms
+  - `CountryCard`: ~XXms
+  - `CountryTable`: ~XXms
+- Flame Graph показал, что при изменении года или сортировки перерендеривался **весь список стран**, даже если визуально ничего не менялось.
+- Ranked Chart показал высокую нагрузку на `CountryCard`.
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+**Скриншоты:**
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Flame Graph (до)
+- Ranked Chart (до)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Optimizations
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+**Применённые техники:**
+
+- `React.memo` для:
+  - `CountryList`
+  - `CountryCard`
+  - `Controls`
+  - `ColumnSelectorModal`
+- `useMemo` для:
+  - вычисления `headers`
+  - выбора `latestRow`
+  - списка доступных колонок
+  - генерации `regionLabel`
+  - фильтрованных/отсортированных `visibleCountries`
+- `useCallback` для:
+  - `onSearch`, `onSort`, `onYearChange`
+  - `toggleRegion`
+  - `runWorker` (обработчик Web Worker)
+- Вынесена логика виртуализации таблиц для CountryTable (`useVirtualList`) → рендерятся только видимые строки таблицы.
+
+---
+
+## Profiling After Optimizations (после оптимизаций)
+
+**Наблюдения:**
+
+- Committed at: ~3.5ms when sorting by population
+- Render Duration: ~6.8ms when sorting by population
+- Committed at: ~4.6ms when country search
+- Render Duration: ~7.4ms when country search
+- Committed at: ~3.5ms change of year
+- Render Duration: ~6.9ms change of year
+- Committed at: ~2.7ms add/remove a column
+- Render Duration: ~41.3ms add/remove a column
+  Remove a column:
+  - `LazyComponent`: ~2.4ms
+  - `CountryList`: ~43.8ms
+  - `CountryCard`: ~2ms
+  - `CountryTable`: ~0.1ms
+- Перерендериваются **только изменённые элементы**, а не весь список.
+- Значительно уменьшилась нагрузка на `CountryCard`.
+
+**Скриншоты:**
+
+- Flame Graph (после)
+- Ranked Chart (после)
+
+---
+
+## Вывод
+
+После оптимизаций удалось:
+
+- уменьшить commit duration и render duration,
+- сократить количество ненужных ререндеров,
+- улучшить отзывчивость интерфейса при сортировке, поиске и фильтрации.

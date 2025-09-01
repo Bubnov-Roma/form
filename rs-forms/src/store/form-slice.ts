@@ -1,5 +1,4 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-
 interface UserData {
   readonly id: string;
   readonly name: string;
@@ -10,7 +9,6 @@ interface UserData {
   readonly agreement: boolean;
   readonly avatarBase64: string | null;
 }
-
 interface FormState {
   readonly isModalOpen: boolean;
   readonly mode: 'controlled' | 'uncontrolled' | null;
@@ -58,7 +56,6 @@ const formSlice = createSlice({
     },
   },
 });
-
 export const {
   openModal,
   closeModal,
